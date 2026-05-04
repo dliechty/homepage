@@ -279,6 +279,169 @@
       color: var(--color-text-muted);
     }
 
+    .copyright-link {
+      color: inherit;
+      cursor: pointer;
+    }
+
+    .copyright-link:hover {
+      color: var(--color-accent);
+      opacity: 1;
+    }
+
+    /* Snake easter egg */
+    .snake-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+      background: rgba(15, 15, 26, 0.72);
+      backdrop-filter: blur(8px);
+    }
+
+    .snake-overlay.is-open {
+      display: flex;
+    }
+
+    .snake-game {
+      width: min(100%, 420px);
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-md);
+      overflow: hidden;
+    }
+
+    .snake-header,
+    .snake-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      padding: 1rem;
+    }
+
+    .snake-title {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--color-text);
+    }
+
+    .snake-score {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--color-text-muted);
+    }
+
+    .snake-board-wrap {
+      position: relative;
+      padding: 0 1rem;
+    }
+
+    #snake-board {
+      display: block;
+      width: 100%;
+      aspect-ratio: 1;
+      background: var(--color-bg);
+      border: 1px solid var(--color-border);
+      border-radius: 8px;
+      touch-action: none;
+    }
+
+    .snake-message {
+      position: absolute;
+      inset: 0 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+      text-align: center;
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--color-text);
+      background: rgba(250, 250, 250, 0.76);
+      border-radius: 8px;
+      pointer-events: none;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      .snake-message {
+        background: rgba(15, 15, 26, 0.76);
+      }
+    }
+
+    .snake-message[hidden] {
+      display: none;
+    }
+
+    .snake-controls {
+      display: grid;
+      grid-template-columns: repeat(3, 44px);
+      grid-template-rows: repeat(2, 44px);
+      gap: 0.375rem;
+      justify-content: center;
+      padding: 0 1rem 1rem;
+    }
+
+    .snake-control {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 44px;
+      height: 44px;
+      border: 1px solid var(--color-border);
+      border-radius: 8px;
+      background: var(--color-surface);
+      color: var(--color-text);
+      font-size: 1.1rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .snake-control:hover {
+      border-color: var(--color-accent);
+      color: var(--color-accent);
+    }
+
+    .snake-control-up {
+      grid-column: 2;
+    }
+
+    .snake-control-left {
+      grid-column: 1;
+      grid-row: 2;
+    }
+
+    .snake-control-down {
+      grid-column: 2;
+      grid-row: 2;
+    }
+
+    .snake-control-right {
+      grid-column: 3;
+      grid-row: 2;
+    }
+
+    .snake-action {
+      border: 1px solid var(--color-border);
+      border-radius: 8px;
+      background: var(--color-surface);
+      color: var(--color-text);
+      padding: 0.5rem 0.75rem;
+      font: inherit;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .snake-action:hover {
+      border-color: var(--color-accent);
+      color: var(--color-accent);
+    }
+
     /* SVG icons inline */
     .icon {
       width: 16px;
@@ -298,6 +461,10 @@
 
       section {
         padding: 3rem 0;
+      }
+
+      .snake-overlay {
+        padding: 1rem;
       }
     }
   </style>
@@ -398,8 +565,309 @@
   </main>
 
   <footer>
-    <p>&copy; 2026 David Liechty. All rights reserved.</p>
+    <p><a href="#snake" class="copyright-link" id="snake-trigger">&copy; 2026 David Liechty</a>. All rights reserved.</p>
   </footer>
+
+  <div class="snake-overlay" id="snake-overlay" role="dialog" aria-modal="true" aria-labelledby="snake-title" hidden>
+    <div class="snake-game">
+      <div class="snake-header">
+        <div>
+          <h2 class="snake-title" id="snake-title">Snake</h2>
+          <p class="snake-score">Score: <span id="snake-score">0</span></p>
+        </div>
+        <button class="snake-action" type="button" id="snake-close">Close</button>
+      </div>
+      <div class="snake-board-wrap">
+        <canvas id="snake-board" width="360" height="360" aria-label="Snake game board"></canvas>
+        <div class="snake-message" id="snake-message">Use arrow keys, WASD, swipe, or the buttons.</div>
+      </div>
+      <div class="snake-controls" aria-label="Snake controls">
+        <button class="snake-control snake-control-up" type="button" data-direction="up" aria-label="Move up">&uarr;</button>
+        <button class="snake-control snake-control-left" type="button" data-direction="left" aria-label="Move left">&larr;</button>
+        <button class="snake-control snake-control-down" type="button" data-direction="down" aria-label="Move down">&darr;</button>
+        <button class="snake-control snake-control-right" type="button" data-direction="right" aria-label="Move right">&rarr;</button>
+      </div>
+      <div class="snake-footer">
+        <button class="snake-action" type="button" id="snake-restart">Restart</button>
+        <p class="snake-score">Best: <span id="snake-best">0</span></p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (() => {
+      const trigger = document.getElementById('snake-trigger');
+      const overlay = document.getElementById('snake-overlay');
+      const closeButton = document.getElementById('snake-close');
+      const restartButton = document.getElementById('snake-restart');
+      const canvas = document.getElementById('snake-board');
+      const ctx = canvas.getContext('2d');
+      const scoreEl = document.getElementById('snake-score');
+      const bestEl = document.getElementById('snake-best');
+      const messageEl = document.getElementById('snake-message');
+      const cells = 18;
+      const cellSize = canvas.width / cells;
+      const tickMs = 115;
+      const directions = {
+        up: { x: 0, y: -1 },
+        down: { x: 0, y: 1 },
+        left: { x: -1, y: 0 },
+        right: { x: 1, y: 0 }
+      };
+
+      let snake;
+      let food;
+      let direction;
+      let nextDirection;
+      let score;
+      let best = getBestScore();
+      let timer;
+      let running = false;
+      let gameEnded = false;
+      let touchStart = null;
+
+      bestEl.textContent = best;
+
+      function resetGame() {
+        snake = [
+          { x: 8, y: 9 },
+          { x: 7, y: 9 },
+          { x: 6, y: 9 }
+        ];
+        direction = directions.right;
+        nextDirection = directions.right;
+        score = 0;
+        gameEnded = false;
+        scoreEl.textContent = score;
+        messageEl.textContent = 'Use arrow keys, WASD, swipe, or the buttons.';
+        messageEl.hidden = false;
+        placeFood();
+        draw();
+      }
+
+      function openGame(event) {
+        event.preventDefault();
+        overlay.hidden = false;
+        overlay.classList.add('is-open');
+        document.body.style.overflow = 'hidden';
+        resetGame();
+        closeButton.focus();
+      }
+
+      function closeGame() {
+        stopGame();
+        overlay.classList.remove('is-open');
+        overlay.hidden = true;
+        document.body.style.overflow = '';
+        trigger.focus();
+      }
+
+      function startGame() {
+        stopGame();
+        running = true;
+        timer = window.setInterval(tick, tickMs);
+      }
+
+      function stopGame() {
+        running = false;
+        window.clearInterval(timer);
+      }
+
+      function restartGame() {
+        resetGame();
+      }
+
+      function placeFood() {
+        do {
+          food = {
+            x: Math.floor(Math.random() * cells),
+            y: Math.floor(Math.random() * cells)
+          };
+        } while (snake.some(segment => segment.x === food.x && segment.y === food.y));
+      }
+
+      function setDirection(name) {
+        if (gameEnded) return;
+        const candidate = directions[name];
+        if (!candidate) return;
+        const reversing = candidate.x + direction.x === 0 && candidate.y + direction.y === 0;
+        if (!reversing) {
+          nextDirection = candidate;
+          messageEl.hidden = true;
+          if (!running) startGame();
+        }
+      }
+
+      function tick() {
+        direction = nextDirection;
+        const head = snake[0];
+        const nextHead = { x: head.x + direction.x, y: head.y + direction.y };
+        const isEating = nextHead.x === food.x && nextHead.y === food.y;
+        const hitWall = nextHead.x < 0 || nextHead.x >= cells || nextHead.y < 0 || nextHead.y >= cells;
+        const body = isEating ? snake : snake.slice(0, -1);
+        const hitSelf = body.some(segment => segment.x === nextHead.x && segment.y === nextHead.y);
+
+        if (hitWall || hitSelf) {
+          gameOver();
+          return;
+        }
+
+        snake.unshift(nextHead);
+
+        if (isEating) {
+          score += 1;
+          scoreEl.textContent = score;
+          if (score > best) {
+            best = score;
+            bestEl.textContent = best;
+            setBestScore(best);
+          }
+          placeFood();
+        } else {
+          snake.pop();
+        }
+
+        draw();
+      }
+
+      function gameOver() {
+        stopGame();
+        gameEnded = true;
+        messageEl.textContent = 'Game over. Press Restart to play again.';
+        messageEl.hidden = false;
+        draw();
+      }
+
+      function draw() {
+        const styles = getComputedStyle(document.documentElement);
+        const bg = styles.getPropertyValue('--color-bg').trim();
+        const border = styles.getPropertyValue('--color-border').trim();
+        const accent = styles.getPropertyValue('--color-accent').trim();
+        const muted = styles.getPropertyValue('--color-text-muted').trim();
+
+        ctx.fillStyle = bg;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        ctx.strokeStyle = border;
+        ctx.lineWidth = 1;
+        for (let i = 1; i < cells; i += 1) {
+          const line = i * cellSize;
+          ctx.beginPath();
+          ctx.moveTo(line, 0);
+          ctx.lineTo(line, canvas.height);
+          ctx.moveTo(0, line);
+          ctx.lineTo(canvas.width, line);
+          ctx.stroke();
+        }
+
+        ctx.fillStyle = accent;
+        drawCell(food.x, food.y, 0.32);
+
+        snake.forEach((segment, index) => {
+          ctx.fillStyle = index === 0 ? accent : muted;
+          drawCell(segment.x, segment.y, 0.18);
+        });
+      }
+
+      function drawCell(x, y, inset) {
+        const pad = cellSize * inset;
+        ctx.beginPath();
+        if (ctx.roundRect) {
+          ctx.roundRect(
+            x * cellSize + pad,
+            y * cellSize + pad,
+            cellSize - pad * 2,
+            cellSize - pad * 2,
+            5
+          );
+        } else {
+          ctx.rect(x * cellSize + pad, y * cellSize + pad, cellSize - pad * 2, cellSize - pad * 2);
+        }
+        ctx.fill();
+      }
+
+      function getBestScore() {
+        try {
+          return Number(localStorage.getItem('snakeBestScore') || 0);
+        } catch {
+          return 0;
+        }
+      }
+
+      function setBestScore(value) {
+        try {
+          localStorage.setItem('snakeBestScore', String(value));
+        } catch {
+          // The score is optional; gameplay should continue if storage is blocked.
+        }
+      }
+
+      function handleKeydown(event) {
+        if (overlay.hidden) return;
+
+        const keyMap = {
+          ArrowUp: 'up',
+          w: 'up',
+          W: 'up',
+          ArrowDown: 'down',
+          s: 'down',
+          S: 'down',
+          ArrowLeft: 'left',
+          a: 'left',
+          A: 'left',
+          ArrowRight: 'right',
+          d: 'right',
+          D: 'right'
+        };
+
+        if (event.key === 'Escape') {
+          closeGame();
+          return;
+        }
+
+        if (event.key === 'Enter' && !running) {
+          restartGame();
+          return;
+        }
+
+        if (keyMap[event.key]) {
+          event.preventDefault();
+          setDirection(keyMap[event.key]);
+        }
+      }
+
+      function handleTouchStart(event) {
+        const touch = event.changedTouches[0];
+        touchStart = { x: touch.clientX, y: touch.clientY };
+      }
+
+      function handleTouchEnd(event) {
+        if (!touchStart) return;
+        const touch = event.changedTouches[0];
+        const dx = touch.clientX - touchStart.x;
+        const dy = touch.clientY - touchStart.y;
+        touchStart = null;
+
+        if (Math.max(Math.abs(dx), Math.abs(dy)) < 24) return;
+        setDirection(Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? 'right' : 'left') : (dy > 0 ? 'down' : 'up'));
+      }
+
+      trigger.addEventListener('click', openGame);
+      closeButton.addEventListener('click', closeGame);
+      restartButton.addEventListener('click', restartGame);
+      document.addEventListener('keydown', handleKeydown);
+      canvas.addEventListener('touchstart', handleTouchStart, { passive: true });
+      canvas.addEventListener('touchend', handleTouchEnd, { passive: true });
+      overlay.addEventListener('click', event => {
+        if (event.target === overlay) closeGame();
+      });
+      document.querySelectorAll('[data-direction]').forEach(button => {
+        button.addEventListener('click', () => setDirection(button.dataset.direction));
+      });
+
+      resetGame();
+    })();
+  </script>
 
 </body>
 </html>
