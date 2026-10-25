@@ -8,10 +8,12 @@ Static personal homepage for David Liechty. Single-page site with no build step,
 
 ## Architecture
 
-- **`index.html`** — The entire site: HTML, CSS (inlined in `<style>`), and inline SVG icons. No JavaScript.
+- **`index.html`** — The entire site: HTML, CSS (inlined in `<style>`), inline SVG icons/favicon, and a small inline `<script>` (live service status, scroll reveal, snake easter egg).
 - Deployed via **GitHub Pages** directly from the `main` branch.
-- Uses **CSS custom properties** (`--color-*`) for theming with automatic light/dark mode via `prefers-color-scheme`.
-- Typography from Google Fonts (Inter).
+- Dark-only "home lab terminal" theme built on **CSS custom properties** (`--color-*`); amber accent, green/red for status.
+- Typography from Google Fonts (JetBrains Mono for headings/terminal bits, Inter for body text).
+- Service cards read live status from Uptime Kuma badge endpoints (`status.qwertyshoe.com/api/badge/<id>/status`; the badges allow cross-origin reads, the heartbeat JSON API doesn't). Each card's `data-monitor` is the monitor ID on the public `/status/home` page.
+- Motion respects `prefers-reduced-motion`.
 
 ## Development
 
